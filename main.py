@@ -18,7 +18,7 @@ class Apartment(BaseModel):
     key: str
     name: str
     location: str
-    area_m2: bool
+    area_m2: float
     rooms: Dict[str, Room]
 
     @staticmethod
@@ -59,10 +59,17 @@ class Manager:
 
     def load_data(self):
         self.apartments = Apartment.from_json_file(self.parameters.apartments_json_path)
-
+        self.tenants = Tenant.from_json_file(self.parameters.tenants_json_path)
 
 if __name__ == '__main__':
     parameters = Parameters()
     manager = Manager(parameters)
 
+    for apartment in manager.apartments.values():
+        print(apartment.key, apartment.name, apartment.location, apartment.area_m2)
+        for room in apartment.rooms.values():
+            print('  ', room.name, room.area_m2)
+
+    for tenant in manager.tenants.values():
+        print(tenant.name, tenant.apartment, tenant.room, tenant.rent_pln, tenant.deposit_pln, tenant.date_agreement_from, tenant.date_agreement_to)
     

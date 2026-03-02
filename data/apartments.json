@@ -2,6 +2,7 @@
     "apart-polanka": {
         "key": "apart-polanka",
         "name": "Polanka",
+        "location": "Polanka 3a",
         "area_m2": 65,
         "rooms": {
             "room-bigger": {

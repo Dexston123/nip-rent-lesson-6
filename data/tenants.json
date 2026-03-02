@@ -1,0 +1,11 @@
+{
+    "tenant-1": {
+        "name": "tenant-1",
+        "apartment": "apart-polanka",
+        "room": "room-bigger",
+        "rent_pln": 1500.0,
+        "deposit_pln": 3000.0,
+        "date_agreement_from": "2024-01-01",
+        "date_agreement_to": "2024-12-31"
+    }
+}
