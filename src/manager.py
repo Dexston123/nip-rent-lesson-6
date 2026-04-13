@@ -71,4 +71,65 @@ class Manager:
             )
         for tenant in tenants_in_apartment ] 
     
+    def get_debtors_report(self, apartment_key: str, year: int, month: int) -> List[Tuple[str, float, float, float]]:
+        apartment_settlement = self.get_settlement(apartment_key, year, month)
+        if apartment_settlement is None:
+            return []
+
+        tenants_settlements = self.create_tenants_settlements(apartment_settlement)
+        if not tenants_settlements:
+            return []
+
+        report = []
+
+        for tenant_settlement in tenants_settlements:
+            tenant_name = tenant_settlement.tenant
+            due = tenant_settlement.total_due_pln
+
+            paid = sum(
+                (
+                    t.amount_pln
+                    for t in self.transfers
+                    if t.tenant == tenant_name
+                    and t.settlement_year == year
+                    and t.settlement_month == month
+                    and t.apartment == apartment_key
+                ),
+                0.0
+            )
+
+            debt = due - paid
+
+            if debt > 0:
+                report.append((tenant_name, due, paid, debt))
+
+        return report
     
+    def get_yearly_costs(self, apartment_key: str, year: int) -> float:
+        if apartment_key not in self.apartments:
+            return 0.0
+
+        return sum(
+            self.get_apartment_costs(apartment_key, year, month) or 0.0
+            for month in range(1, 13)
+        )
+    
+    def get_tax(self, year: int, month: int, tax_rate: float) -> float:
+        debtors_report = self.get_debtors_report("apart-polanka", year, month)
+        total_revenue = sum(paid for _, _, paid, _ in debtors_report)
+        tax = total_revenue * tax_rate
+
+        return round(tax, 2)
+    
+    def get_annual_report(self, year: int) -> Tuple[float, float]:
+        total_costs = 0.0
+        total_revenue = 0.0
+
+        for month in range(1, 13):
+            total_costs += self.get_apartment_costs('apart-polanka', year, month) or 0.0
+
+        for transfer in self.transfers:
+            if transfer.settlement_year == year:
+                total_revenue += transfer.amount_pln
+
+        return total_costs, total_revenue
